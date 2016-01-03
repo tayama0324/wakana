@@ -1,0 +1,35 @@
+@(message: String)
+
+@main("Play with Scala.js") {
+<body onload="com.github.tayama0324.dora.Global().initialize()">
+<div class="container">
+    <div class="part-appender">
+        Add another part:
+        <input type="text" id="part-name" value="sop" />
+        <button onclick="com.github.tayama0324.dora.Global().controller.appendPart()">Append</button>
+    </div>
+
+    <table id="table" class="parts">
+        <tr>
+            <th>Part</th>
+            <th>Volume</th>
+            <th></th>
+        </tr>
+        <tr>
+            <td>
+                <select id="pianoSelect" onchange="com.github.tayama0324.dora.Global().controller.initialize()">
+                    <optgroup label="Kokoro no senritsu">
+                        <option value="kokoro-no-senritsu-middle">Kokoro no Senritsu - Middle (@@senanase)</option>
+                    </optgroup>
+                </select>
+            </td>
+            <td><input type="range" id="piano-volume" min="0" max="100" value="100" /></td>
+            <td><button onclick="com.github.tayama0324.dora.Global().controller.playPiano()" >Replay</button></td>
+        </tr>
+    </table>
+    <button onclick="com.github.tayama0324.dora.Global().controller.replayAll()">Replay All Parts</button>
+    <button onclick="com.github.tayama0324.dora.Global().controller.stop()" >Stop</button>
+
+    <h4>Debug</h4>
+    <input type="file" id="upload" multiple />
+}
