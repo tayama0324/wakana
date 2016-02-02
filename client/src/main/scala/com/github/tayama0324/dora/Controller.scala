@@ -1,16 +1,20 @@
 package com.github.tayama0324.dora
 
+import com.github.tayama0324.com.github.tayama0324.scalajs.recorderjs.Recorder
 import com.github.tayama0324.scalajs.webaudio.AudioContext
 import com.github.tayama0324.scalajs.webaudio.AudioNode
 import com.github.tayama0324.scalajs.webaudio.EndedEvent
 import com.github.tayama0324.scalajs.webaudio.MediaStream
 import com.github.tayama0324.scalajs.webaudio.getUserMedia
 import java.util.concurrent.atomic.AtomicBoolean
+import org.scalajs.dom.Blob
 import org.scalajs.dom.Event
 import org.scalajs.dom.FileReader
+import org.scalajs.dom.MessageEvent
 import org.scalajs.dom.UIEvent
 import org.scalajs.dom.raw.DOMException
 import org.scalajs.dom.raw.HTMLInputElement
+import org.scalajs.dom.raw.WebSocket
 import org.scalajs.jquery.jQuery
 import scala.collection.mutable.ArrayBuffer
 import scala.scalajs.js
@@ -162,11 +166,22 @@ class Controller {
   }
 
   def replayAll(): Unit = {
+    val recorder = Global.getRecorder
+
     parts.values.foreach(_.prepareForReplay())
     piano.foreach(_.prepareForReplay(
       js.Dynamic.global.document.getElementById("piano-volume").asInstanceOf[HTMLInputElement],
-      { _: EndedEvent => () }
+      { _: EndedEvent =>
+        recorder.stop()
+        recorder.exportWAV({ wav: Blob =>
+          Global.newMp3Encoder().encode(wav, { mp3: Blob =>
+            Recorder.forceDownload(mp3, "output.mp3")
+          })
+        })
+      }
     ))
+    recorder.clear()
+    recorder.record()
     parts.values.foreach(_.startReplay())
     piano.foreach(_.startReplay(180))
   }
@@ -177,8 +192,16 @@ object Global extends js.JSApp {
   private val audioContext = new AudioContext
   private var sourceNode: Option[AudioNode] = None
   private val ready: AtomicBoolean = new AtomicBoolean(false)
-
+  private val destination = audioContext.createGain()
+  private val recorder: Recorder = new Recorder(destination, js.Dynamic.literal(
+    workerPath = "/assets/js/bower_components/recorderjs/recorderWorker.js"
+  ))
+  def newMp3Encoder(): Mp3Encoder = new Mp3Encoder(
+    "/assets/js/Recordmp3js/js/mp3worker.js"
+  )
   val controller: Controller = new Controller
+
+  destination.gain.value = 0.5F
 
   def initialize(): Unit = {
     getUserMedia(
@@ -208,4 +231,7 @@ object Global extends js.JSApp {
       case None => throw new RuntimeException("Microphone is not ready yet.")
     }
   }
+
+  def getRecorder = recorder
+  def getDestination = destination
 }

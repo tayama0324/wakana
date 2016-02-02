@@ -129,6 +129,7 @@ class Player(buffer: AudioBuffer, volumeControl: HTMLInputElement, onEnded: js.F
 
     source.onended = onEnded
     source.connect(gain)
+    gain.connect(Global.getDestination)
     gain.connect(Global.getAudioContext.destination)
   }
 
@@ -139,6 +140,7 @@ class Player(buffer: AudioBuffer, volumeControl: HTMLInputElement, onEnded: js.F
     }
     sourceNode match {
       case Some(node) => dom.window.setTimeout({ () => node.start() }, offset)
+        println("Channel: " + node.numberOfOutputs)
       case None => println("Error: Not not prepared yet.")
     }
   }
