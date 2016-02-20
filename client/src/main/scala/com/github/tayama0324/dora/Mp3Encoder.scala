@@ -11,7 +11,7 @@ import scala.scalajs.js.typedarray.Float32Array
 import scala.scalajs.js.typedarray.Uint8Array
 
 /**
- * Created by takashi_tayama on 2016/01/17.
+ * Recordmp3.js-based MP3 encoder.
  */
 class Mp3Encoder(mp3WorkerPath: String) {
 

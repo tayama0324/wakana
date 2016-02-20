@@ -173,11 +173,17 @@ class Controller {
       js.Dynamic.global.document.getElementById("piano-volume").asInstanceOf[HTMLInputElement],
       { _: EndedEvent =>
         recorder.stop()
-        recorder.exportWAV({ wav: Blob =>
-          Global.newMp3Encoder().encode(wav, { mp3: Blob =>
-            Recorder.forceDownload(mp3, "output.mp3")
-          })
+        recorder.getBuffer({ buffers: js.Array[Float32Array] =>
+          val left = buffers(0)
+          val right = buffers(1)
+          val blob = Global.newMp3Encoder().encodeDirectly(left, right)
+          Recorder.forceDownload(blob, "output-direct.mp3")
         })
+//        recorder.exportWAV({ wav: Blob =>
+//          Global.newMp3Encoder().encode(wav, { mp3: Blob =>
+//            Recorder.forceDownload(mp3, "output.mp3")
+//          })
+//        })
       }
     ))
     recorder.clear()
@@ -196,9 +202,14 @@ object Global extends js.JSApp {
   private val recorder: Recorder = new Recorder(destination, js.Dynamic.literal(
     workerPath = "/assets/js/bower_components/recorderjs/recorderWorker.js"
   ))
-  def newMp3Encoder(): Mp3Encoder = new Mp3Encoder(
-    "/assets/js/Recordmp3js/js/mp3worker.js"
+  //  def newMp3Encoder(): Mp3Encoder = new Mp3Encoder(
+  //    "/assets/js/Recordmp3js/js/mp3worker.js"
+  //  )
+  def newMp3Encoder(): LameJsMp3Encorder = new LameJsMp3Encorder(
+    workerPath = "/assets/js/node_modules/lamejs/worker/worker.js",
+    config = js.Dynamic.literal()
   )
+
   val controller: Controller = new Controller
 
   destination.gain.value = 0.5F

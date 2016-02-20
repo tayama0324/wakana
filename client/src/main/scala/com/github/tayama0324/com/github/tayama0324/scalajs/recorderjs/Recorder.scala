@@ -54,12 +54,12 @@ class Recorder(source: AudioNode, config: js.Object = js.Dynamic.literal()) exte
    * for the separate left and right channels) to the callback. It can be played back by creating
    * a new source buffer and setting these buffers as the separate channel data:
    */
-  def getBuffer(callback: js.Function1[js.Array[Float32Array], Unit]) = js.native
+  def getBuffer(callback: js.Function1[js.Array[Float32Array], Unit]): Unit = js.native
 
   /**
    * This will set the configuration for Recorder by passing in a config object.
    */
-  def configure(config: js.Object) = js.native
+  def configure(config: js.Object): Unit = js.native
 }
 
 /**
