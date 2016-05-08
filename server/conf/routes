@@ -1,4 +1,3 @@
 GET /   test.TestController.get()
-GET /ws test.WebSocketController.socket()
 
 GET /assets/*file controllers.Assets.at(path="/public", file)
