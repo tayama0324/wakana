@@ -1,17 +1,13 @@
 package com.github.tayama0324.dora
 
-import com.github.tayama0324.scalajs.webaudio.AudioBuffer
-import com.github.tayama0324.scalajs.webaudio.AudioBufferSourceNode
-import com.github.tayama0324.scalajs.webaudio.AudioNode
-import com.github.tayama0324.scalajs.webaudio.AudioProcessingEvent
-import com.github.tayama0324.scalajs.webaudio.EndedEvent
+import com.github.tayama0324.scalajs.webaudio._
 import org.scalajs.dom
-import org.scalajs.dom.DOMException
-import org.scalajs.dom.Event
-import org.scalajs.dom.XMLHttpRequest
 import org.scalajs.dom.ext.Ajax
 import org.scalajs.dom.raw.HTMLInputElement
+import org.scalajs.dom.{DOMException, Event, XMLHttpRequest}
+
 import scala.collection.mutable.ArrayBuffer
+import scala.concurrent.{Future, Promise}
 import scala.scalajs.concurrent.JSExecutionContext
 import scala.scalajs.js
 import scala.scalajs.js.typedarray.Float32Array
@@ -122,13 +118,20 @@ class Player(buffer: AudioBuffer, volumeControl: HTMLInputElement, onEnded: js.F
       val min = volumeControl.min.toFloat
       val value = volumeControl.valueAsNumber.toFloat
       val factor = (value - min) / max
-      gain.gain.value = factor * factor
+      gain.gain.value = factor * factor * 0.2F
     }
     setGain()
     volumeControl.onchange = { _: Event => setGain() }
 
     source.onended = onEnded
-    source.connect(gain)
+
+    val convolver = Global.getAudioContext.createConvolver()
+    convolver.buffer = Global.controller.impulseResponses.get("central-hall").flatMap(_.audioBuffer).getOrElse(throw new RuntimeException("IR not loaded"))
+    convolver.normalize = true
+
+    source.connect(convolver)
+    convolver.connect(gain)
+
     gain.connect(Global.getDestination)
     gain.connect(Global.getAudioContext.destination)
   }
@@ -153,6 +156,43 @@ class Player(buffer: AudioBuffer, volumeControl: HTMLInputElement, onEnded: js.F
         sourceNode = None
       case None =>
         println("not playing")
+    }
+  }
+}
+
+object AudioLoader {
+
+  private implicit val executionContext = JSExecutionContext.runNow
+
+  def load(url: String): Future[AudioBuffer] = {
+    Ajax.get(url, responseType = "arraybuffer").flatMap { xhr: XMLHttpRequest =>
+      val response = xhr.response.asInstanceOf[js.typedarray.ArrayBuffer]
+      val promise = Promise[AudioBuffer]
+      Global.getAudioContext.decodeAudioData(
+        response,
+        { ab: AudioBuffer => promise.success(ab); () },
+        { e: DOMException => promise.failure(new RuntimeException(e.message)); () }
+      )
+      promise.future
+    }
+  }
+}
+
+class ImpulseResponse(filename: String) {
+
+  private implicit val executionContext = JSExecutionContext.runNow
+
+  var audioBuffer: Option[AudioBuffer] = None
+
+  def load() = {
+    Ajax.get(filename, responseType = "arraybuffer").map { xhr: XMLHttpRequest =>
+      val response = xhr.response.asInstanceOf[js.typedarray.ArrayBuffer]
+      val promise = Promise[AudioBuffer]
+      Global.getAudioContext.decodeAudioData(
+        response,
+        { ab: AudioBuffer => audioBuffer = Some(ab); () },
+        { e: DOMException => println(e) }
+      )
     }
   }
 }

@@ -39,6 +39,11 @@ class Controller {
       "assets/blob/piano/kokoro-no-senritsu.mp3", 55, 78, 2
     )
   )
+  val impulseResponses = Map(
+    "parth-hall" -> new ImpulseResponse("assets/blob/ir/perth_city_hall_balcony_ir_edit.wav"),
+    "central-hall" -> new ImpulseResponse("assets/blob/ir/ir_row_1l_sl_centre.wav")
+  )
+
 
   var piano: Option[Piano] = None
   var parts: MutableMap[String, Part] = new scala.collection.mutable.HashMap
@@ -54,6 +59,7 @@ class Controller {
       pianoConfig.end,
       pianoConfig.fade
     ))
+    impulseResponses.values.foreach(_.load())
   }
 
   def playPiano(): Unit = {

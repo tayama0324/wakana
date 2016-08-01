@@ -168,8 +168,15 @@ class AudioContext extends EventTarget {
   //  Creates a ChannelMergerNode, which is used to combine channels from multiple audio streams into a single audio stream.
   //  AudioContext.createChannelSplitter()
   //  Creates a ChannelSplitterNode, which is used to access the individual channels of an audio stream and process them separately.
-  //  AudioContext.createConvolver()
-  //  Creates a ConvolverNode, which can be used to apply convolution effects to your audio graph, for example a reverberation effect.
+
+  /**
+   * Creates a ConvolverNode, which can be used to apply convolution effects to
+   * your audio graph, for example a reverberation effect.
+   *
+   * @return An ConvolverNode
+   */
+  def createConvolver(): ConvolverNode = js.native
+
   //  AudioContext.createDelay()
   //  Creates a DelayNode, which is used to delay the incoming audio signal by a certain amount. This node is also useful to create feedback loops in a Web Audio API graph.
   //  AudioContext.createDynamicsCompressor()
@@ -931,6 +938,21 @@ trait AnalyserNode extends AudioNode {
    * @return A Uint8Array.
    */
   def getByteTimeDomainData(array: Uint8Array): Uint8Array = js.native
+}
+
+@js.native
+class ConvolverNode extends AudioNode {
+  /**
+   * A mono, stereo, or 4-channel AudioBuffer containing the (possibly multichannel)
+   * impulse response used by the ConvolverNode to create the reverb effect.
+   */
+  var buffer: AudioBuffer = js.native
+
+  /**
+    * A boolean that controls whether the impulse response from the buffer will be scaled
+    * by an equal-power normalization when the buffer attribute is set, or not.
+    */
+  var normalize: Boolean = js.native
 }
 
 /**
