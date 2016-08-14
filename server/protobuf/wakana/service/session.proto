@@ -1,0 +1,61 @@
+syntax = "proto3";
+
+package com.github.tayama0324.wakana;
+
+import "wakana/entity.proto";
+
+service SessionService {
+
+    // Create a new request token, which is needed to start Twitter OAuth login.
+    // This method returns an URL to Twitter OAuth Login entry point. Users are supposed to
+    // be redirected the URL, be authenticated and authorize, and then proceed to
+    // loginWithTwitterOAuthVerifier.
+    //
+    // TODO: current implementation directly returns twitter4j RequestToken object.
+    // Convert the token into protobuf message and then this method can be defined
+    // as RPC service.
+    // rpc issueTwitterRequestToken(IssueRequestTokenRequest) returns (IssueRequestTokenResponse)
+
+    // Login with Twitter OAuth token and OAuth verifier.
+    rpc loginWithTwitterOAuthVerifier(LoginWithTwitterOAuthVerifierRequest) returns (LoginWithTwitterOAuthVerifierResponse) {}
+
+    // Get a session from session ID.
+    rpc getSessionById(GetSessionByIdRequest) returns (GetSessionByIdResponse) {}
+}
+
+message LoginWithTwitterOAuthVerifierRequest {
+    // OAuth token.
+    string oauth_token = 1;
+
+    // OAuth verifier.
+    string oauth_verifier = 2;
+}
+
+message LoginWithTwitterOAuthVerifierResponse {
+
+    enum Status {
+        // The user has successfully logged in.
+        OK = 0;
+
+        // oauth_token and/or oauth_verifier is invalid. The user is requested
+        // to retry login in appropriate way.
+        INVALID_TOKEN = 1;
+
+        // You are not allowed to login. Ask administrator for privilege.
+        FORBIDDEN = 2;
+    }
+
+    Status status = 1;
+
+    Session session = 2;
+}
+
+message GetSessionByIdRequest {
+
+    int64 session_id = 1;
+}
+
+message GetSessionByIdResponse {
+
+    Session session = 1;
+}

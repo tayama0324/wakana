@@ -1,4 +1,5 @@
 import sbt.Project.projectToRef
+import com.trueaccord.scalapb.{ScalaPbPlugin => PB}
 
 name := "wakana"
 
@@ -9,6 +10,10 @@ scalaVersion := "2.11.7"
 lazy val clients = Seq(client)
 lazy val scalaV = "2.11.7"
 
+lazy val protoPaths = Seq(
+  file("server/protobuf").getCanonicalFile()
+)
+
 lazy val server = (project in file("server")).settings(
   scalaVersion := scalaV,
   scalaJSProjects := clients,
@@ -17,9 +22,18 @@ lazy val server = (project in file("server")).settings(
   libraryDependencies ++= Seq(
     "com.vmunier" %% "play-scalajs-scripts" % "0.3.0",
     "org.webjars" % "jquery" % "1.11.1",
+    "org.twitter4j" % "twitter4j-core" % "[4.0,)",
     specs2 % Test
-  )
-).enablePlugins(PlayScala).
+  )).settings(
+    PB.protobufSettings:_*
+  ).settings(
+    PB.runProtoc in PB.protobufConfig := { args =>
+      com.github.os72.protocjar.Protoc.runProtoc("-v300" +: args.toArray)
+    },
+    PB.includePaths in PB.protobufConfig ++= protoPaths,
+    sourceDirectories in PB.protobufConfig ++= protoPaths,
+    PB.grpc in PB.protobufConfig := false
+  ).enablePlugins(PlayScala).
   aggregate(clients.map(projectToRef): _*).
   dependsOn(sharedJvm)
 

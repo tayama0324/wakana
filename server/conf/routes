@@ -1,3 +1,7 @@
 GET /   test.TestController.get()
 
+GET /login com.github.tayama0324.wakana.controller.LoginControllerImpl.entry()
+GET /login-callback com.github.tayama0324.wakana.controller.LoginControllerImpl.callback()
+GET /login-check com.github.tayama0324.wakana.controller.LoginControllerImpl.loginCheck()
+
 GET /assets/*file controllers.Assets.at(path="/public", file)

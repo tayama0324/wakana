@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package com.github.tayama0324.wakana;
+
+import "google/protobuf/timestamp.proto";
+
+message User {
+    // Twitter ID (not screen name) of the user. A user is identified by his/her twitter id.
+    int64 twitter_id = 1;
+
+    // Screen name of the user.
+    string screen_name = 2;
+}
+
+message Session {
+
+    // ID.
+    int64 id = 1;
+
+    // Owner of the session.
+    int64 user_id = 2;
+
+    // Date and time of expiry of this session.
+    google.protobuf.Timestamp expire_at = 3;
+}
+

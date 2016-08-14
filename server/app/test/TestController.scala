@@ -10,7 +10,7 @@ import play.api.mvc.Results
 /**
  * Created by takashi_tayama on 2015/12/30.
  */
-class TestController @Inject() extends Controller{
+class TestController extends Controller{
 
   def assets(path: String, file: String): Action[AnyContent] = Action { _ =>
     Results.Ok(s"Path = $path\nFile = $file")
@@ -20,3 +20,5 @@ class TestController @Inject() extends Controller{
     Results.Ok(views.html.index("Title"))
   }
 }
+
+object TestController extends TestController

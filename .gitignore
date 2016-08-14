@@ -2,4 +2,5 @@ target/
 .idea
 
 *.mp3
-logs/*
+server/logs
+server/conf/secret
